@@ -3,14 +3,12 @@
 // -- REQUIRES -- //
 var express = require('express');
 var bcrypt = require('bcryptjs');
-// var jwt = require('jsonwebtoken');
 
 // -- MODELS -- //
 var Usuario = require('../models/usuario');
 
 // Inicializar variables
 var app = express();
-// var SEED = require('../config/config').SEED;
 var mdAutnticacion = require('../middlewares/autenticacion');
 
 // -- ROUTES -- //
@@ -20,7 +18,12 @@ var mdAutnticacion = require('../middlewares/autenticacion');
 // ==========================
 app.get( '/', (req, res, next) => {
 
+    var desde = req.query.desde || 0;
+    desde = Number(desde);
+
     Usuario.find({}, 'nombre email img role')
+        .skip(desde)
+        .limit(5)
         .exec(
             (err, usuarios) => {
                 if (err) {
@@ -31,16 +34,65 @@ app.get( '/', (req, res, next) => {
                     });
                 }
 
-                res.status(200).json({
-                    ok: true,
-                    usuarios: usuarios
+                Usuario.count({}, (err, conteo) => {
+
+                    if (err) {
+                        return res.status(500).json({
+                            ok: false,
+                            message: 'Error buscando total de usuarios',
+                            errors: err
+                        });
+                    }
+                    
+                    res.status(200).json({
+                        ok: true,
+                        usuarios: usuarios,
+                        total: conteo
+                    });
+
                 });
+
             }
         );
 
 });
 
 // -- Requieren token -- //
+
+// ======================
+// Crear un nuevo usuario
+// ======================
+app.post('/', mdAutnticacion.verificarToken, (req, res) => {
+
+    var body = req.body; // IMPORTANT: sólo funciona si está instalado el body-parser
+
+    var usuario = new Usuario ({
+        nombre: body.nombre,
+        email: body.email,
+        password: bcrypt.hashSync( body.password, 10 ),
+        img: body.img,
+        role: body.role
+    });
+
+    usuario.save( (err, usuarioGuardado) => {
+
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                message: 'Error al crear usuario',
+                errors: err
+            });
+        }
+
+        res.status(201).json({
+            ok: true,
+            usuario: usuarioGuardado,
+            usuarioToken: req.usuario
+        });
+
+    });
+
+});
 
 // =====================
 // Actualizar un usuario
@@ -95,41 +147,6 @@ app.put('/:id', mdAutnticacion.verificarToken, (req, res) => {
 
 });
 
-// ======================
-// Crear un nuevo usuario
-// ======================
-app.post('/', mdAutnticacion.verificarToken, (req, res) => {
-
-    var body = req.body; // IMPORTANT: sólo funciona si está instalado el body-parser
-
-    var usuario = new Usuario ({
-        nombre: body.nombre,
-        email: body.email,
-        password: bcrypt.hashSync( body.password, 10 ),
-        img: body.img,
-        role: body.role
-    });
-
-    usuario.save( (err, usuarioGuardado) => {
-
-        if (err) {
-            return res.status(400).json({
-                ok: false,
-                message: 'Error al crear usuario',
-                errors: err
-            });
-        }
-
-        res.status(201).json({
-            ok: true,
-            usuario: usuarioGuardado,
-            usuarioToken: req.usuario
-        });
-
-    });
-
-});
-
 // ========================
 // Borrar usuario por el id
 // ========================
@@ -164,4 +181,5 @@ app.delete('/:id', mdAutnticacion.verificarToken, (req, res) => {
 
 });
 
+// -- EXPORTS -- //
 module.exports = app;
