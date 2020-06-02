@@ -7,3 +7,9 @@ Recuerden que es necesario reconstruir los módulos de node, en caso de que se q
 ```
 npm install
 ```
+
+Y tras ello, para ejecutarlo usar el comando:
+
+```
+npm run dev
+```
