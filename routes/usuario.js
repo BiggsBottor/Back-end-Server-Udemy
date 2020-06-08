@@ -57,12 +57,10 @@ app.get( '/', (req, res, next) => {
 
 });
 
-// -- Requieren token -- //
-
 // ======================
 // Crear un nuevo usuario
 // ======================
-app.post('/', mdAutnticacion.verificarToken, (req, res) => {
+app.post('/', (req, res) => {
 
     var body = req.body; // IMPORTANT: sólo funciona si está instalado el body-parser
 
@@ -94,6 +92,8 @@ app.post('/', mdAutnticacion.verificarToken, (req, res) => {
 
 });
 
+// -- Requieren token -- //
+
 // =====================
 // Actualizar un usuario
 // =====================
@@ -122,7 +122,7 @@ app.put('/:id', mdAutnticacion.verificarToken, (req, res) => {
 
         usuario.nombre = body.nombre;
         usuario.email = body.email;
-        usuario.role = body.role;
+        // usuario.role = body.role;
 
         usuario.save( ( err, usuarioGuardado) => {
 
