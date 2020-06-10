@@ -18,6 +18,7 @@ var imagenesRoutes = require('./routes/imagenes');
 // Inicializar variables
 var app = express();
 
+
 // -- CORS -- //
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from
@@ -32,15 +33,26 @@ app.use(function(req, res, next) {
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+// mongoose config to avoid warnings
+mongoose.set('useNewUrlParser', true);
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
+mongoose.set('useUnifiedTopology', true);
+
 
 // conexión con la BBDD
-mongoose.connection.openUri('mongodb://localhost:27017/hospitalDB', (err, res) => { 
+// -- NEW connection method -- //
+mongoose.connect('mongodb://localhost:27017/hospitalDB')
+    .then(() => console.log('Base de datos: \x1b[32m%s\x1b[0m', 'online'))
+    .catch(err => console.error('No se pudo conectar con MongoDB..', err));
 
-    if ( err ) throw err;
+// mongoose.connection.openUri('mongodb://localhost:27017/hospitalDB', (err, res) => { 
+    
+//     if ( err ) throw err;
 
-    console.log('Base de datos: \x1b[32m%s\x1b[0m', 'online');    
+//     console.log('Base de datos: \x1b[32m%s\x1b[0m', 'online');    
 
-});
+// });
 
 // -- OPCIONAL -- //
 // server-index config
