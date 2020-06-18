@@ -30,3 +30,40 @@ exports.verificarToken = function( req, res, next ) {
     });
 
 };
+
+// ====================
+// Verificar ADMIN_ROLE
+// ====================
+exports.verificarADMIN_ROLE = function( req, res, next ) {
+
+    var usuario = req.usuario;
+
+    if ( usuario.role === 'ADMIN_ROLE' ) { next(); return; }
+    else {
+        return res.status(401).json({
+            ok: false,
+            message: 'Token incorrecto',
+            errors: { message: 'Acceso denegado. Contacte con un Administrador' }
+        });
+    }
+
+};
+
+// ====================================
+// Verificar ADMIN_ROLE o Mismo Usuario
+// ====================================
+exports.verificarADMINoSiMismo = function( req, res, next ) {
+
+    var usuario = req.usuario;
+    var id = req.params.id;
+
+    if ( usuario.role === 'ADMIN_ROLE' || usuario._id === id ) { next(); return; }
+    else {
+        return res.status(401).json({
+            ok: false,
+            message: 'Token incorrecto - No es Administrador o el mismo Usuario',
+            errors: { message: 'Acceso denegado. Contacte con un Administrador' }
+        });
+    }
+
+};
