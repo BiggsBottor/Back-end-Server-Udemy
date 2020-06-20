@@ -11,6 +11,7 @@ var Usuario = require('../models/usuario');
 
 // -- CONFIG -- //
 var SEED = require('../config/config').SEED;
+var mdAutnticacion = require('../middlewares/autenticacion');
 
 //-- Google -- //
 var CLIENT_ID = require('../config/config').CLIENT_ID;
@@ -21,6 +22,20 @@ const client = new OAuth2Client(CLIENT_ID);
 var app = express();
 
 // -- ROUTES -- //
+
+// =============
+// Renueva Token
+// =============
+app.get('/renewtoken', mdAutnticacion.verificarToken, ( req, res ) => {
+
+    var token = jwt.sign( { usuario: req.usuario }, SEED, { expiresIn: 14400 } ); // 4h
+
+    res.status(200).json({
+        ok: true,
+        token: token
+    });
+
+});
 
 // =================================
 // Autenticación Google
